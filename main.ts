@@ -266,7 +266,8 @@ while (true) {
           exprs: {
             expr: Expr,
             value: string;
-          }[]
+          }[],
+          type: string
         }
 
         const rows: Row[] = []; 
@@ -277,7 +278,8 @@ while (true) {
         for (let r = 0; r < rowsCount; ++r) {
           const row: Row = {
             vars: [],
-            exprs: [] 
+            exprs: [],
+            type: ''
           };
 
           for (let c = 0; c < vars.size; ++c) {
@@ -325,6 +327,14 @@ while (true) {
           rows[r].exprs.push(...indExprs.map(v => {
             return { expr: v, value: evaluateExpr(v, { variables: varss } ) }
           }));
+
+          if (rows[r].exprs.length > 1) {
+            if (rows[r].exprs.every(v => v.value === 'T')) {
+              rows[r].type = 'Tautology'
+            } else if (rows[r].exprs.every(v => v.value === 'F')) {
+              rows[r].type = 'Contradiction'
+            }
+          }
         }
         
         for (let r = 0; r < rows.length; ++r) {
@@ -335,6 +345,10 @@ while (true) {
               const ww: number = indExprsWids[i];
               return ' '.repeat(Math.ceil(ww / 2) + (ww % 2 === 0 ? 1 : 0)) + v.value + ' '.repeat(Math.ceil(ww / 2))
             }).join('|') + '|'
+
+            if (rows[r].type !== '') {
+              str += ' ' + rows[r].type
+            }
           }
 
           console.log(str);
