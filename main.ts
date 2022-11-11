@@ -245,11 +245,14 @@ while (true) {
       let indExprsWids: number[] = []
 
       {
-        const head = '|' + Array.from(vars.values()).map(v => ' ' + v).join(' |') + ' |' + indExprs.map(v => {
-          const str = exprToString(v);
-          indExprsWids.push(str.split('').length);
-          return ' ' + str;
-        }).join(' |') + ' |';
+        let head = '|' + Array.from(vars.values()).map(v => ' ' + v).join(' |') + ' |';
+        if (indExprs.length > 0) {
+          head += indExprs.map(v => {
+            const str = exprToString(v);
+            indExprsWids.push(str.split('').length);
+            return ' ' + str;
+          }).join(' |') + ' |';
+        }
 
         console.log(head);
         console.log('-'.repeat(head.length));
@@ -269,6 +272,8 @@ while (true) {
         const rows: Row[] = []; 
 
         const rowsCount = Math.pow(2, vars.size);
+        const tempAr: number[] = new Array(vars.size).fill(0);
+
         for (let r = 0; r < rowsCount; ++r) {
           const row: Row = {
             vars: [],
@@ -276,12 +281,9 @@ while (true) {
           };
 
           for (let c = 0; c < vars.size; ++c) {
-            // TODO: Make it work for if there's more than 2 columns
-            if (c === 0) {
-              row.vars.push(r < rowsCount / 2 ? 'T' : 'F')
-            } else if (c === 1) {
-              row.vars.push(r % 2 ? 'F' : 'T')
-            }
+            const sep =  Math.pow(2, vars.size - 1 -c );
+
+            row.vars.push((Math.floor(r / sep)) % 2 === 0 ? 'T' : 'F')            
           }
 
           rows.push(row)
@@ -328,10 +330,12 @@ while (true) {
         for (let r = 0; r < rows.length; ++r) {
           let str = '|' + rows[r].vars.map(v => ' ' + v).join(' |') + ' |';
 
-          str += rows[r].exprs.map((v, i) => {
-            const ww: number = indExprsWids[i];
-            return ' '.repeat(Math.ceil(ww / 2) + (ww % 2 === 0 ? 1 : 0)) + v.value + ' '.repeat(Math.ceil(ww / 2))
-          }).join('|') + '|'
+          if (indExprs.length > 0) {
+            str += rows[r].exprs.map((v, i) => {
+              const ww: number = indExprsWids[i];
+              return ' '.repeat(Math.ceil(ww / 2) + (ww % 2 === 0 ? 1 : 0)) + v.value + ' '.repeat(Math.ceil(ww / 2))
+            }).join('|') + '|'
+          }
 
           console.log(str);
         }
